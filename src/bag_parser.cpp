@@ -1,19 +1,14 @@
 //
 // Created by prashant on 5/27/20.
 //
-#include <boost/foreach.hpp>
-#define foreach BOOST_FOREACH
 
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 
-
-#include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/core/core.hpp>
 
@@ -31,58 +26,58 @@ int main(int argc, char **argv){
     ros::Publisher rgb_pub = nh_.advertise<sensor_msgs::Image>("camera/rgb/image_raw",10);
     ros::Publisher depth_pub = nh_.advertise<sensor_msgs::Image>("camera/depth/image_raw",10);
 
-    std::vector<std::string> topics;
-    topics.push_back(std::string("/camera/rgb/image_color"));
-    topics.push_back(std::string("/camera/depth/image"));
-
-    rosbag::View* viewptr = new rosbag::View(bag, rosbag::TopicQuery(topics));
-    rosbag::View::iterator start_iter, end_itr, reference_image_itr;
-    start_iter = viewptr->begin();
-    end_itr = viewptr->end();
-    reference_image_itr = start_iter;
+    rosbag::View* rbg_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/rgb/image_color")));
+    rosbag::View* depth_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/depth/image")));
 
     sensor_msgs::Image rgb_image;
     sensor_msgs::Image depth_image;
 
-    // Will iterate through the bag
-    for(rosbag::View::iterator kf_itr = start_iter; kf_itr != end_itr; ++kf_itr){
+    for(std::pair<rosbag::View::iterator, rosbag::View::iterator> i(rbg_viewptr->begin(), depth_viewptr->begin());
+            i.first != rbg_viewptr->end() && i.second != depth_viewptr->end(); ++i.first, ++i.second){
 
-        rosbag::MessageInstance m = *kf_itr;
-        if (m.getTopic().find("depth") != std::string::npos) {
-            sensor_msgs::Image::ConstPtr s = m.instantiate<sensor_msgs::Image>();
+        rosbag::MessageInstance rgb_instance = *i.first;
+        rosbag::MessageInstance depth_instance = *i.second;
+
+        if (depth_instance.getTopic().find("depth") != std::string::npos) {
+            sensor_msgs::Image::ConstPtr s = depth_instance.instantiate<sensor_msgs::Image>();
             if(s != NULL) {
                 std::cout << "Got KF Depth message \t" << s->header.seq << std::endl;
                 depth_pub.publish(s);
             }
         }
-        if( m.getTopic().find("rgb") != std::string::npos ){
-            sensor_msgs::Image::ConstPtr s = m.instantiate<sensor_msgs::Image>();
+        if( rgb_instance.getTopic().find("rgb") != std::string::npos ){
+            sensor_msgs::Image::ConstPtr s = rgb_instance.instantiate<sensor_msgs::Image>();
             if(s != NULL) {
                 std::cout << "Got KF Color message \t" << s->header.seq << std::endl;
                 rgb_pub.publish(s);
             }
         }
 
-        rosbag::View::iterator ref_img_itr = kf_itr;
+        rosbag::View::iterator rgb_ref_img_itr = i.first;
+        rosbag::View::iterator depth_ref_img_itr = i.second;
+
         for(unsigned int i = 0; i<number_of_image_before_kf; ++i){
-            ref_img_itr++;
-            rosbag::MessageInstance m = *ref_img_itr;
-            sensor_msgs::Image::ConstPtr s = m.instantiate<sensor_msgs::Image>();
-            if (m.getTopic().find("depth") != std::string::npos) {
+
+            rgb_ref_img_itr++;
+            depth_ref_img_itr++;
+
+            rosbag::MessageInstance rgb_ref = *rgb_ref_img_itr;
+            rosbag::MessageInstance depth_ref = *depth_ref_img_itr;
+            if (depth_ref_img_itr->getTopic().find("depth") != std::string::npos) {
+                sensor_msgs::Image::ConstPtr s = depth_ref.instantiate<sensor_msgs::Image>();
                 if(s != NULL) {
-                    std::cout << "Got Reference Depth message \t" << s->header.seq << std::endl;
-//                    depth.publish(s);
+                    std::cout << "Got REF Depth message \t" << s->header.seq << std::endl;
+                    depth_pub.publish(s);
                 }
             }
-            if( m.getTopic().find("rgb") != std::string::npos ){
+            if( rgb_ref_img_itr->getTopic().find("rgb") != std::string::npos ){
+                sensor_msgs::Image::ConstPtr s = rgb_ref.instantiate<sensor_msgs::Image>();
                 if(s != NULL) {
-                    std::cout << "Got Reference Color message \t" << s->header.seq << std::endl;
-//                    rgb_pub.publish(s);
+                    std::cout << "Got REF Color message \t" << s->header.seq << std::endl;
+                    rgb_pub.publish(s);
                 }
             }
         }
-
-
     }
 
 }
