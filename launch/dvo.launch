@@ -30,9 +30,10 @@
 
     <group ns="dvo_vis">
         <node launch-prefix="$(arg launch_prefix)" pkg="dvo_ros" type="camera_tracker" name="camera_tracker" output="screen" if="$(arg run_slam)" >
-            <remap from="/camera/depth_registered/input_image" to="/camera/depth/image_raw"/>
+<!--            <remap from="/camera/depth_registered/input_image" to="/camera/depth/image_raw"/>-->
+            <remap from="/camera/depth_registered/input_image" to="/camera/depth/image"/>
             <remap from="/camera/depth_registered/camera_info" to="/camera/depth/camera_info"/>
-            <remap from="/camera/rgb/input_image" to="/camera/rgb/image_raw"/>
+            <remap from="/camera/rgb/input_image" to="/camera/rgb/image_color"/>
             <remap from="/camera/rgb/camera_info" to="/camera/rgb/camera_info"/>
         </node>
     </group>
@@ -42,10 +43,10 @@
     <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" output="screen" if="$(arg run_reconfigure)"/>
 
     <param name="use_sim_time" value="true" />
-    <node launch-prefix="$(arg launch_prefix)" pkg="rosbag" type="play" name="player" output="log" args=" --rate $(arg bagfile_playback_rate) --clock $(arg bagfile_path)"/>
+<!--    <node launch-prefix="$(arg launch_prefix)" pkg="rosbag" type="play" name="player" output="log" args=" &#45;&#45;rate $(arg bagfile_playback_rate) &#45;&#45;clock $(arg bagfile_path)"/>-->
 
 
-    <node name="bag_parser" pkg="bag_parser" type="node" output="screen"/>
+<!--    <node name="bag_parser" pkg="bag_parser" type="bag_parser_node" output="screen"/>-->
     <node if="$(arg run_image_view)" name="image_view" pkg="image_view" type="image_view" output="screen">
         <remap from="image" to="camera/rgb/image_raw" />
     </node>
