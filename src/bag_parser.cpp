@@ -33,8 +33,8 @@ int main(int argc, char **argv) {
     int number_of_image_before_kf;
     std::string bag_path;
     nh_.param<int>("num_image_btw_kf", number_of_image_before_kf, 30);
-//    nh_.param<std::string>("bag_path", bag_path, "/home/prashant/Downloads/rgbd_dataset_freiburg2_pioneer_360.bag");
-    nh_.param<std::string>("bag_path", bag_path, "/home/prashant/Downloads/20200124_006.bag");
+    nh_.param<std::string>("bag_path", bag_path, "/home/prashant/Downloads/rgbd_dataset_freiburg2_pioneer_360.bag");
+//    nh_.param<std::string>("bag_path", bag_path, "/home/prashant/Downloads/20200124_006.bag");
     ROS_WARN_STREAM("BAG_PARSER::Image between KF is \t" << number_of_image_before_kf);
 
     ros::Publisher rgb_pub = nh_.advertise<sensor_msgs::Image>("camera/rgb/image_color", 10);
@@ -43,14 +43,14 @@ int main(int argc, char **argv) {
     ros::Publisher depth_camera_info_pub = nh_.advertise<sensor_msgs::CameraInfo>("camera/depth/camera_info", 10);
 
     bag.open(bag_path, rosbag::bagmode::Read);
-//    rosbag::View *rbg_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/rgb/image_color")));
-//    rosbag::View *depth_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/depth/image")));
-//    rosbag::View *rgb_cam_info = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/rgb/camera_info")));
-//    rosbag::View *depth_cam_info = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/depth/camera_info")));
-    rosbag::View *rbg_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("camera/rgb/image_raw")));
-    rosbag::View *depth_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("camera/depth_registered/image_raw")));
-    rosbag::View *rgb_cam_info = new rosbag::View(bag, rosbag::TopicQuery(std::string("camera/rgb/camera_info")));
-    rosbag::View *depth_cam_info = new rosbag::View(bag, rosbag::TopicQuery(std::string("camera/depth_registered/camera_info")));
+    rosbag::View *rbg_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/rgb/image_color")));
+    rosbag::View *depth_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/depth/image")));
+    rosbag::View *rgb_cam_info = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/rgb/camera_info")));
+    rosbag::View *depth_cam_info = new rosbag::View(bag, rosbag::TopicQuery(std::string("/camera/depth/camera_info")));
+//    rosbag::View *rbg_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("camera/rgb/image_raw")));
+//    rosbag::View *depth_viewptr = new rosbag::View(bag, rosbag::TopicQuery(std::string("camera/depth_registered/image_raw")));
+//    rosbag::View *rgb_cam_info = new rosbag::View(bag, rosbag::TopicQuery(std::string("camera/rgb/camera_info")));
+//    rosbag::View *depth_cam_info = new rosbag::View(bag, rosbag::TopicQuery(std::string("camera/depth_registered/camera_info")));
     sensor_msgs::Image rgb_image;
     sensor_msgs::Image depth_image;
 
